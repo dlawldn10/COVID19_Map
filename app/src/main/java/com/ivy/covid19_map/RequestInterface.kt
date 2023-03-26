@@ -12,5 +12,5 @@ interface RequestInterface {
         @Query("serviceKey") serviceKey: String,
         @Query("page") page: Int,
         @Query("perPage") perPage: Int
-    ) : Call<getCentersResponseData>
+    ) : Call<GetCentersResponseData>
 }

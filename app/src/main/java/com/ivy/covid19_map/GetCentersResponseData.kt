@@ -1,6 +1,6 @@
 package com.ivy.covid19_map
 
-data class getCentersResponseData(
+data class GetCentersResponseData(
     val totalCount: Int,
     val data: ArrayList<CenterData>
 )
