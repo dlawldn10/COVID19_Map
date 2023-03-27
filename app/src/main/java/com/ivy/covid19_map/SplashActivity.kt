@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.room.Room
 import com.ivy.covid19_map.databinding.ActivitySplashBinding
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
@@ -15,8 +14,9 @@ import kotlin.concurrent.timer
 
 class SplashActivity : AppCompatActivity() {
     lateinit var binding: ActivitySplashBinding
-    lateinit var centerDB: CenterDB
     lateinit var server: RequestInterface
+    lateinit var centerDB: CenterDB
+    lateinit var centerRepository: CenterRepository
 
     companion object {
         private const val PER_PAGE = 10
@@ -27,7 +27,8 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        centerDB = Room.databaseBuilder(this, CenterDB::class.java, "CenterDB").build()
+        centerDB = CenterDB.getDatabase(this)
+        centerRepository = CenterRepository(centerDB.getCenterDAO())
 
         val okHttpClient = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
@@ -43,11 +44,11 @@ class SplashActivity : AppCompatActivity() {
 
 
         GlobalScope.launch {
-            centerDB.getCenterDAO().deleteAllCenter()
+            centerRepository.deleteAll()
 
             val getCentersJob = async {
                 for (x in 1..10) {
-                    getCenters(x).forEach { centerDB.getCenterDAO().insertCenter(it) }
+                    getCenters(x).forEach { centerRepository.insert(it) }
                 }
                 // 진행률 딜레이 테스트 코드
                 //delay(4000)
@@ -78,11 +79,11 @@ class SplashActivity : AppCompatActivity() {
                     runBlocking {
                         getCentersJob.join()
                         // 데이터 저장 테스트 코드
-//                        println("================")
-//                        for (i in centerDB.getCenterDAO().selectAllCenter()){
-//                            println(i)
-//                        }
-//                        println("================")
+                        println("================")
+                        for (i in centerRepository.selectAll()){
+                            println(i)
+                        }
+                        println("================")
                     }
 
                 }
@@ -107,7 +108,7 @@ class SplashActivity : AppCompatActivity() {
             resources.getString(R.string.odcloud_header_authorization_key),
             resources.getString(R.string.odcloud_query_service_key),
             page,
-            Companion.PER_PAGE
+            PER_PAGE
         ).awaitResponse()
 
         if (response.code() == 200 && response.body() != null){
