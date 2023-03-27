@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.widget.Toast
 import com.ivy.covid19_map.databinding.ActivitySplashBinding
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
@@ -48,7 +50,7 @@ class SplashActivity : AppCompatActivity() {
 
             val getCentersJob = async {
                 for (x in 1..10) {
-                    getCenters(x).forEach { centerRepository.insert(it) }
+                    getCenters(x).collect{ centerRepository.insert(it) }
                 }
                 // 진행률 딜레이 테스트 코드
                 //delay(4000)
@@ -101,8 +103,7 @@ class SplashActivity : AppCompatActivity() {
 
     }
 
-    private suspend fun getCenters(page: Int): ArrayList<CenterData> {
-        val result = arrayListOf<CenterData>()
+    private suspend fun getCenters(page: Int) = flow {
 
         val response = server.getCentersRequest(
             resources.getString(R.string.odcloud_header_authorization_key),
@@ -115,14 +116,9 @@ class SplashActivity : AppCompatActivity() {
             if (response.body()!!.totalCount <= 0) {
                 Toast.makeText(applicationContext, "검색 결과가 없습니다", Toast.LENGTH_SHORT).show()
             }else{
-                for (center in response.body()!!.data){
-                    result.add(center)
-                }
+                emit(response.body()!!.data)
             }
         }
-
-
-        return result
 
     }
 

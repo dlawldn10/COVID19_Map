@@ -4,8 +4,8 @@ import androidx.annotation.WorkerThread
 
 class CenterRepository(private val centerDAO: CenterDAO) {
 
-    suspend fun insert(centerData: CenterData){
-        centerDAO.insertCenter(centerData)
+    suspend fun insert(centerArray: ArrayList<CenterData>){
+        centerArray.forEach { centerDAO.insertCenter(it) }
     }
 
     suspend fun deleteAll(){
