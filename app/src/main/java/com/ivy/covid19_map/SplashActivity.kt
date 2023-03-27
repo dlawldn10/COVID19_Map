@@ -1,22 +1,27 @@
 package com.ivy.covid19_map
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.ivy.covid19_map.databinding.ActivitySplashBinding
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flow
-import okhttp3.OkHttpClient
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import retrofit2.awaitResponse
+import javax.inject.Inject
 import kotlin.concurrent.timer
 
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
     lateinit var binding: ActivitySplashBinding
+
+    @Inject
     lateinit var server: RequestInterface
+
     lateinit var centerDB: CenterDB
     lateinit var centerRepository: CenterRepository
 
@@ -31,18 +36,6 @@ class SplashActivity : AppCompatActivity() {
 
         centerDB = CenterDB.getDatabase(this)
         centerRepository = CenterRepository(centerDB.getCenterDAO())
-
-        val okHttpClient = OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.odcloud.kr/api/15077586/v1/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .build()
-
-        server = retrofit.create(RequestInterface::class.java)
 
 
         GlobalScope.launch {
