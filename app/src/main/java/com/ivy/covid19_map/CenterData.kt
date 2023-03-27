@@ -13,5 +13,6 @@ data class CenterData(
     val phoneNumber: String,
     val updatedAt: String,
     val lat: String,
-    val lng: String
+    val lng: String,
+    val centerType: String
 )

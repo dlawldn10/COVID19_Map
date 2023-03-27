@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f3d12bb73239ef3db68578bd086e0eaf",
+    "identityHash": "6b3a0fb97eb8a7a69a563730c99f81c5",
     "entities": [
       {
         "tableName": "CenterData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `address` TEXT NOT NULL, `centerName` TEXT NOT NULL, `facilityName` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, `lat` TEXT NOT NULL, `lng` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `address` TEXT NOT NULL, `centerName` TEXT NOT NULL, `facilityName` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, `lat` TEXT NOT NULL, `lng` TEXT NOT NULL, `centerType` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -55,6 +55,12 @@
             "columnName": "lng",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "centerType",
+            "columnName": "centerType",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -70,7 +76,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f3d12bb73239ef3db68578bd086e0eaf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6b3a0fb97eb8a7a69a563730c99f81c5')"
     ]
   }
 }
