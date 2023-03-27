@@ -1,10 +1,14 @@
 package com.ivy.covid19_map
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ivy.covid19_map.databinding.ActivitySplashBinding
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -22,7 +26,7 @@ class SplashActivity : AppCompatActivity() {
     @Inject
     lateinit var server: RequestInterface
 
-    lateinit var centerDB: CenterDB
+    @Inject
     lateinit var centerRepository: CenterRepository
 
     companion object {
@@ -34,8 +38,7 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        centerDB = CenterDB.getDatabase(this)
-        centerRepository = CenterRepository(centerDB.getCenterDAO())
+        val mapActivityIntent = Intent(this@SplashActivity, MainActivity::class.java)
 
 
         GlobalScope.launch {
@@ -59,7 +62,7 @@ class SplashActivity : AppCompatActivity() {
                 // 진행률이 100%가 되면 지도 액티비티로 이동
                 if (binding.progressBar.progress == 100) {
                     println("----- move to next activity")
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                    startActivity(mapActivityIntent)
                     cancel()
                     finish()
                 }else{
@@ -73,12 +76,6 @@ class SplashActivity : AppCompatActivity() {
                     // 끝날때까지 대기 후 다시 진행
                     runBlocking {
                         getCentersJob.join()
-                        // 데이터 저장 테스트 코드
-                        println("================")
-                        for (i in centerRepository.selectAll()){
-                            println(i)
-                        }
-                        println("================")
                     }
 
                 }
