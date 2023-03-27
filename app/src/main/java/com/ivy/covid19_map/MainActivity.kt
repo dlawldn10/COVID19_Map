@@ -7,11 +7,8 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.ivy.covid19_map.databinding.ActivityMainBinding
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.MapFragment
+import com.naver.maps.map.*
 import com.naver.maps.map.MapFragment.newInstance
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.Overlay.OnClickListener
@@ -29,8 +26,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     @Inject
     lateinit var centerRepository: CenterRepository
 
-    private val markerList = arrayListOf<Marker>()
-    private val centerList = arrayListOf<CenterData>()
     val markerCenterMap = mutableMapOf<Marker, CenterData>()
     private lateinit var naverMap: NaverMap
 
@@ -39,6 +34,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val centerTypeMap = mapOf(
         "중앙/권역" to 1, "지역" to 2
     )
+
+    var nowShowingMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,26 +54,37 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val clickedMarker = overlay as Marker
             val clickedCenter = markerCenterMap[clickedMarker]!!
 
-            // 안눌려진 상태
-            if (clickedMarker.captionText.isEmpty()){
-                // 정보 보이기
-                clickedMarker.captionText = clickedCenter.centerName
-                Toast.makeText(this, clickedCenter.toString(), Toast.LENGTH_SHORT).show()
-
-                // 카메라 이동
-                val cameraUpdate = CameraUpdate.scrollTo(LatLng(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble()))
-                naverMap.moveCamera(cameraUpdate)
-            }
-            // 눌려진 상태
-            else {
-                // 정보 숨기기
+            // 선택한 마커 재선택
+            if (nowShowingMarker == clickedMarker){
+                nowShowingMarker = null
                 clickedMarker.captionText = ""
+            }
+            // 선택한 상태에서 다른 마커 선택
+            else if(nowShowingMarker != null){
+                nowShowingMarker!!.captionText = ""
+                nowShowingMarker = clickedMarker
+                clickedMarker.captionText = clickedCenter.centerName
+                moveCamera(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble())
+            }
+            // 미선택 상태에서 마커 선택
+            else if (nowShowingMarker == null){
+                nowShowingMarker = clickedMarker
+                clickedMarker.captionText = clickedCenter.centerName
+                moveCamera(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble())
             }
 
             true
         }
 
 
+    }
+
+    /* 카메라 이동 */
+    fun moveCamera(lat: Double, lng: Double){
+        val cameraUpdate = CameraUpdate
+            .scrollTo(LatLng(lat, lng))
+            .animate(CameraAnimation.Easing, 1000)
+        naverMap.moveCamera(cameraUpdate)
     }
 
     private suspend fun getCenterFromDB() = flow {
@@ -87,6 +95,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     @UiThread
     override fun onMapReady(naverMap: NaverMap) {
         this.naverMap = naverMap
+        naverMap.setOnMapClickListener { point, coord ->
+            nowShowingMarker?.captionText = ""
+            nowShowingMarker = null
+        }
 
         // 1->5->2->3->4
         //println("1=========")
