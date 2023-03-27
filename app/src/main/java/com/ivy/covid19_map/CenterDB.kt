@@ -1,11 +1,12 @@
 package com.ivy.covid19_map
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [CenterData::class], version = 1)
+@Database(entities = [CenterData::class], version = 1, exportSchema = true)
 abstract class CenterDB : RoomDatabase() {
     abstract fun getCenterDAO(): CenterDAO
 
