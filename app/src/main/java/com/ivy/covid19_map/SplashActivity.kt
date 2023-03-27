@@ -1,22 +1,33 @@
 package com.ivy.covid19_map
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
-import androidx.room.Room
+import androidx.appcompat.app.AppCompatActivity
 import com.ivy.covid19_map.databinding.ActivitySplashBinding
-import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import retrofit2.awaitResponse
+import javax.inject.Inject
 import kotlin.concurrent.timer
 
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
     lateinit var binding: ActivitySplashBinding
-    lateinit var centerDB: CenterDB
+
+    @Inject
     lateinit var server: RequestInterface
+
+    @Inject
+    lateinit var centerRepository: CenterRepository
 
     companion object {
         private const val PER_PAGE = 10
@@ -27,27 +38,15 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        centerDB = Room.databaseBuilder(this, CenterDB::class.java, "CenterDB").build()
-
-        val okHttpClient = OkHttpClient.Builder()
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.odcloud.kr/api/15077586/v1/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .build()
-
-        server = retrofit.create(RequestInterface::class.java)
+        val mapActivityIntent = Intent(this@SplashActivity, MainActivity::class.java)
 
 
         GlobalScope.launch {
-            centerDB.getCenterDAO().deleteAllCenter()
+            centerRepository.deleteAll()
 
             val getCentersJob = async {
                 for (x in 1..10) {
-                    getCenters(x).forEach { centerDB.getCenterDAO().insertCenter(it) }
+                    getCenters(x).collect{ centerRepository.insert(it) }
                 }
                 // 진행률 딜레이 테스트 코드
                 //delay(4000)
@@ -63,7 +62,7 @@ class SplashActivity : AppCompatActivity() {
                 // 진행률이 100%가 되면 지도 액티비티로 이동
                 if (binding.progressBar.progress == 100) {
                     println("----- move to next activity")
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                    startActivity(mapActivityIntent)
                     cancel()
                     finish()
                 }else{
@@ -77,12 +76,6 @@ class SplashActivity : AppCompatActivity() {
                     // 끝날때까지 대기 후 다시 진행
                     runBlocking {
                         getCentersJob.join()
-                        // 데이터 저장 테스트 코드
-//                        println("================")
-//                        for (i in centerDB.getCenterDAO().selectAllCenter()){
-//                            println(i)
-//                        }
-//                        println("================")
                     }
 
                 }
@@ -100,28 +93,22 @@ class SplashActivity : AppCompatActivity() {
 
     }
 
-    private suspend fun getCenters(page: Int): ArrayList<CenterData> {
-        val result = arrayListOf<CenterData>()
+    private suspend fun getCenters(page: Int) = flow {
 
         val response = server.getCentersRequest(
             resources.getString(R.string.odcloud_header_authorization_key),
             resources.getString(R.string.odcloud_query_service_key),
             page,
-            Companion.PER_PAGE
+            PER_PAGE
         ).awaitResponse()
 
         if (response.code() == 200 && response.body() != null){
             if (response.body()!!.totalCount <= 0) {
                 Toast.makeText(applicationContext, "검색 결과가 없습니다", Toast.LENGTH_SHORT).show()
             }else{
-                for (center in response.body()!!.data){
-                    result.add(center)
-                }
+                emit(response.body()!!.data)
             }
         }
-
-
-        return result
 
     }
 
