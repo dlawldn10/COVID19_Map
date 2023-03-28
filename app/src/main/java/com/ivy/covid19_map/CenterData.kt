@@ -2,6 +2,7 @@ package com.ivy.covid19_map
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity
 data class CenterData(
@@ -15,4 +16,4 @@ data class CenterData(
     val lat: String,
     val lng: String,
     val centerType: String
-)
+): Serializable

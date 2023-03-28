@@ -2,7 +2,6 @@ package com.ivy.covid19_map
 
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import com.ivy.covid19_map.databinding.ActivityMainBinding
@@ -11,7 +10,7 @@ import com.naver.maps.map.*
 import com.naver.maps.map.MapFragment.newInstance
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
-import com.naver.maps.map.overlay.Overlay.OnClickListener
+import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
@@ -21,21 +20,28 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     @Inject
     lateinit var centerRepository: CenterRepository
 
-    val markerCenterMap = mutableMapOf<Marker, CenterData>()
+    private val markerCenterMap = mutableMapOf<Marker, CenterData>()
     private lateinit var naverMap: NaverMap
 
-    lateinit var markerOnClickListener: Overlay.OnClickListener
+    private lateinit var markerOnClickListener: Overlay.OnClickListener
 
-    private val centerTypeMap = mapOf(
-        "중앙/권역" to 1, "지역" to 2
-    )
+    private val centerTypeMap = mapOf("중앙/권역" to 1, "지역" to 2)
 
-    var nowShowingMarker: Marker? = null
+    private var nowShowingMarker: Marker? = null
+
+    private val customDialog = CenterInfoDialogFragment()
+
+    private lateinit var locationSource: FusedLocationSource
+
+    companion object{
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,29 +60,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val clickedMarker = overlay as Marker
             val clickedCenter = markerCenterMap[clickedMarker]!!
 
-            // 선택한 마커 재선택
-            if (nowShowingMarker == clickedMarker){
-                nowShowingMarker = null
-                clickedMarker.captionText = ""
-            }
-            // 선택한 상태에서 다른 마커 선택
-            else if(nowShowingMarker != null){
-                nowShowingMarker!!.captionText = ""
-                nowShowingMarker = clickedMarker
-                clickedMarker.captionText = clickedCenter.centerName
-                moveCamera(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble())
-            }
-            // 미선택 상태에서 마커 선택
-            else if (nowShowingMarker == null){
-                nowShowingMarker = clickedMarker
-                clickedMarker.captionText = clickedCenter.centerName
-                moveCamera(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble())
-            }
+            updateNowShowingMarker(clickedMarker, clickedCenter)
+
 
             true
         }
 
 
+        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        if (locationSource.onRequestPermissionsResult(requestCode, permissions,
+                grantResults)) {
+            if (!locationSource.isActivated) { // 권한 거부됨
+                naverMap.locationTrackingMode = LocationTrackingMode.None
+            }
+            return
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     /* 카메라 이동 */
@@ -87,6 +93,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         naverMap.moveCamera(cameraUpdate)
     }
 
+    private fun updateNowShowingMarker(clickedMarker: Marker, clickedCenter: CenterData){
+
+        // 선택한 마커 재선택
+        if (nowShowingMarker == clickedMarker){
+            nowShowingMarker = null
+            clickedMarker.captionText = ""
+        }
+        // 선택한 상태에서 다른 마커 선택
+        else if(nowShowingMarker != null){
+            nowShowingMarker!!.captionText = ""
+        }
+        // 미선택 상태에서 마커 선택
+        
+        // 갱신 작업
+        nowShowingMarker = clickedMarker
+        clickedMarker.captionText = clickedCenter.centerName
+        moveCamera(clickedCenter.lat.toDouble(), clickedCenter.lng.toDouble())
+        customDialog.centerData = clickedCenter
+        
+        // dialog 띄우기
+        customDialog.show(supportFragmentManager, "CenterInfoDialog")
+    }
+
     private suspend fun getCenterFromDB() = flow {
         centerRepository.selectAll().forEach { emit(it) }
     }
@@ -95,9 +124,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     @UiThread
     override fun onMapReady(naverMap: NaverMap) {
         this.naverMap = naverMap
+        naverMap.locationSource = locationSource
+
+
         naverMap.setOnMapClickListener { point, coord ->
             nowShowingMarker?.captionText = ""
             nowShowingMarker = null
+        }
+
+        // fab버튼 클릭 시 사용자 현재 위치로 이동
+        binding.moveToCurrentLocationFab.setOnClickListener {
+            naverMap.locationTrackingMode = LocationTrackingMode.Follow
         }
 
         // 1->5->2->3->4
