@@ -1,6 +1,7 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.repository
 
-import androidx.annotation.WorkerThread
+import com.ivy.covid19_map.room.CenterDAO
+import com.ivy.covid19_map.CenterData
 
 class CenterRepository(private val centerDAO: CenterDAO) {
 

@@ -7,7 +7,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.ivy.covid19_map.CenterViewModel" />
+            type="com.ivy.covid19_map.viewModel.CenterViewModel" />
 
     </data>
 

@@ -1,6 +1,9 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.room
 
 import android.content.Context
+import com.ivy.covid19_map.repository.CenterRepository
+import com.ivy.covid19_map.room.CenterDAO
+import com.ivy.covid19_map.room.CenterDB
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,9 +1,11 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.controller
 
 import android.graphics.Color
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
+import com.ivy.covid19_map.CenterData
+import com.ivy.covid19_map.repository.CenterRepository
 import com.ivy.covid19_map.databinding.ActivityMainBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*

@@ -1,10 +1,10 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.room
 
 import android.content.Context
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.ivy.covid19_map.CenterData
 
 @Database(entities = [CenterData::class], version = 1, exportSchema = true)
 abstract class CenterDB : RoomDatabase() {

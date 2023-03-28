@@ -1,5 +1,8 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.remoteSource
 
+import android.app.Application
+import android.content.Context
+import com.ivy.covid19_map.repository.NetworkRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,5 +39,11 @@ object NetworkModule {
     @Singleton
     fun providesService(retrofit: Retrofit): RequestInterface {
         return retrofit.create(RequestInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providesNetworkRepository(server: RequestInterface, application: Application): NetworkRepository {
+        return NetworkRepository(server, application)
     }
 }
