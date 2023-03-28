@@ -1,15 +1,14 @@
 package com.ivy.covid19_map.repository
 
 import android.app.Application
-import android.content.Context
 import android.widget.Toast
-import com.ivy.covid19_map.CenterApplication
 import com.ivy.covid19_map.R
 import com.ivy.covid19_map.controller.SplashActivity
 import com.ivy.covid19_map.remoteSource.RequestInterface
 import kotlinx.coroutines.flow.flow
 import retrofit2.awaitResponse
 
+/* 네트워크 Repository */
 class NetworkRepository(private val server: RequestInterface, val application: Application) {
 
     suspend fun getCenters(page: Int) = flow {

@@ -1,8 +1,9 @@
 package com.ivy.covid19_map.repository
 
 import com.ivy.covid19_map.room.CenterDAO
-import com.ivy.covid19_map.CenterData
+import com.ivy.covid19_map.dataClass.CenterData
 
+/* Room Repository */
 class CenterRepository(private val centerDAO: CenterDAO) {
 
     suspend fun insert(centerArray: ArrayList<CenterData>){

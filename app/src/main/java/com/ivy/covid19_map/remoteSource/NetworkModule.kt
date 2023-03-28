@@ -1,7 +1,6 @@
 package com.ivy.covid19_map.remoteSource
 
 import android.app.Application
-import android.content.Context
 import com.ivy.covid19_map.repository.NetworkRepository
 import dagger.Module
 import dagger.Provides
@@ -13,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+/* hilt를 이용하여 네트워크 관련 객체 의존성 주입 */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {

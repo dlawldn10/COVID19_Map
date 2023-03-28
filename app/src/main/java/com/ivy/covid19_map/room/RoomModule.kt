@@ -11,6 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/* hilt를 이용하여 room 관련 객체 의존성 주입 */
 @Module
 @InstallIn(SingletonComponent::class)
 object RoomModule {

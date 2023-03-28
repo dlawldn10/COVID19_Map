@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ivy.covid19_map.CenterData
+import com.ivy.covid19_map.dataClass.CenterData
 
 @Dao
 interface CenterDAO {

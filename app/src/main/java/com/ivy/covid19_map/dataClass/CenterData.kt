@@ -1,9 +1,10 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.dataClass
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.Serializable
 
+/* 예방 접종 센터 데이터 클래스 */
 @Entity
 data class CenterData(
     @PrimaryKey
