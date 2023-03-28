@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var nowShowingMarker: Marker? = null
 
     /* 마커 선택 시 센터의 정보를 표시하는 DialogFragment */
-    private val customDialog = CenterInfoDialogFragment()
+    private lateinit var customDialog: CenterInfoDialog
 
     /* 사용자의 현재 위치를 제공하는 객체 */
     private lateinit var locationSource: FusedLocationSource
@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        customDialog = CenterInfoDialog(this)
 
 
         val fm = supportFragmentManager
@@ -126,7 +128,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         customDialog.centerData = clickedCenter
         
         // dialog 띄우기
-        customDialog.show(supportFragmentManager, "CenterInfoDialog")
+        customDialog.show()
     }
 
     /* room을 통해 저장된 센터 데이터 가져오기 */
