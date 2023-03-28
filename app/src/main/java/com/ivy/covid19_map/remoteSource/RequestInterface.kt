@@ -1,5 +1,6 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.remoteSource
 
+import com.ivy.covid19_map.dataClass.GetCentersResponseData
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header

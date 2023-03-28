@@ -1,13 +1,10 @@
-package com.ivy.covid19_map
+package com.ivy.covid19_map.viewModel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.ivy.covid19_map.CenterData
-import com.ivy.covid19_map.CenterRepository
-import kotlinx.coroutines.launch
+import com.ivy.covid19_map.dataClass.CenterData
 
+/* 센터 데이터를 설정하는데 사용하는 뷰 모델 */
 class CenterViewModel : ViewModel() {
 
     var address = MutableLiveData<String>()
@@ -16,6 +13,7 @@ class CenterViewModel : ViewModel() {
     var phoneNumber = MutableLiveData<String>()
     var updatedAt = MutableLiveData<String>()
 
+    /* UI 업데이트 */
     fun setCenterData(centerData: CenterData){
         address.value = centerData.address
         centerName.value = centerData.centerName
