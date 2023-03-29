@@ -17,4 +17,7 @@ interface CenterDAO {
 
     @Query("DELETE FROM CenterData")
     suspend fun deleteAllCenter()
+
+    @Query("SELECT COUNT(*) FROM CenterData")
+    suspend fun selectAllCount(): Int
 }

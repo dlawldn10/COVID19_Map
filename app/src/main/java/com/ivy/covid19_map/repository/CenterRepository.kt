@@ -17,4 +17,8 @@ class CenterRepository(private val centerDAO: CenterDAO) {
     suspend fun selectAll(): List<CenterData> {
         return centerDAO.selectAllCenter()
     }
+
+    suspend fun selectCount(): Int {
+        return centerDAO.selectAllCount()
+    }
 }

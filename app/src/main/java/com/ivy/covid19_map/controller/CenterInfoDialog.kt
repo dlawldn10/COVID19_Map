@@ -16,8 +16,6 @@ class CenterInfoDialog(private val activity: AppCompatActivity) {
     /* 커스텀 할 dialog */
     private val dialog = Dialog(activity)
 
-
-
     /* 사용자가 선택한 센터의 데이터 */
     var centerData : CenterData? = null
 

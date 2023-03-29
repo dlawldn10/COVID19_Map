@@ -11,11 +11,8 @@ import com.ivy.covid19_map.repository.CenterRepository
 import com.ivy.covid19_map.repository.NetworkRepository
 import com.ivy.covid19_map.viewModel.ProgressBarViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import retrofit2.awaitResponse
 import javax.inject.Inject
 import kotlin.concurrent.timer
@@ -39,6 +36,7 @@ class SplashActivity : AppCompatActivity() {
     companion object {
         /* 한 페이지 당 센터 수 */
         const val PER_PAGE = 10
+        const val REQUIRED_ALL_DATA = 100
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,10 +48,20 @@ class SplashActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        /* API 데이터 저장 */
         GlobalScope.launch {
-            centerRepository.deleteAll()
+            // 테스트용 코드
+            //centerRepository.deleteAll()
 
+            /* 로컬 DB를 확인하여 데이터가 이미 있다면 다음 화면으로 */
+            val getCountJob = async {
+                if (centerRepository.selectCount() == REQUIRED_ALL_DATA){
+                    startMapActivity(this@launch)
+                }
+            }
+
+            getCountJob.await()
+
+            /* API 데이터 저장 */
             val getCentersJob = async {
                 for (x in 1..10) {
                     networkRepository.getCenters(x).collect{ centerRepository.insert(it) }
@@ -68,9 +76,8 @@ class SplashActivity : AppCompatActivity() {
 
                 /* 조건 달성 시 지도 화면으로 이동 */
                 if (progressBarViewModel.barProgress.value == 100) {
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                    cancel()
-                    finish()
+                    startMapActivity(this@launch)
+                    this@timer.cancel()
                 }else{
                     progress += 0.5
                 }
@@ -92,6 +99,12 @@ class SplashActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun startMapActivity(coroutineScope: CoroutineScope){
+        startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+        finish()
+        coroutineScope.cancel()
     }
 
 

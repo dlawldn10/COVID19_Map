@@ -9,7 +9,11 @@ import com.ivy.covid19_map.dataClass.CenterData
 import com.ivy.covid19_map.viewModel.CenterViewModel
 import com.ivy.covid19_map.databinding.DialogCenterInfoBinding
 
+
+
 class CenterInfoDialogFragment: DialogFragment() {
+    /* CenterInfoDialog로 교체하여 미사용
+
     /* 사용자가 선택한 센터의 데이터 */
     var centerData: CenterData? = null
 
@@ -45,4 +49,6 @@ class CenterInfoDialogFragment: DialogFragment() {
         }
 
     }
+
+    */
 }
