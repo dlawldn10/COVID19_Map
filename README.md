@@ -1,4 +1,7 @@
 # COVID19_Map
+## .gitignore
+    /app/src/main/res/values/key_strings.xml  // API key string
+
 ## 프로젝트 구조
 com.ivy.covid19_map
 
